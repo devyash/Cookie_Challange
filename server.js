@@ -13,6 +13,7 @@ var orders= [];
 var unfulfilledOrders=[];
 var ordersWithCookies=[];
 var ordersWithoutTooManyCookies=[];
+var sortedCookies=[]
 
 
 
@@ -43,7 +44,7 @@ function getData(url){
 			if(response.data.orders.length>0){
 			orders=orders.concat(response.data.orders);
 			}
-			url = 'https://backend-challenge-fall-2017.herokuapp.com/orders.json';
+			url = this.url;
 			getData(url+nextpageurl);
 		}
 	})
@@ -79,7 +80,11 @@ function fullfillOrdersWithoutCookie(){
 	res.send(ordersWithCookies);
 }
 
+function sortByCookiesAndId(){
+	sortedCookies=[];
+	sortedCookies=ordersWithCookies.sort();
 
+}
 
 
 

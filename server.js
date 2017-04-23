@@ -7,38 +7,95 @@ const app = express()
 var port = process.env.PORT || 8080;
 // app.use(bodyParser.urlencoded({extended: true}))
 
+var url = 'https://backend-challenge-fall-2017.herokuapp.com/orders.json';
+var available_cookies;
+var orders= [];
+var unfulfilledOrders=[];
+var ordersWithCookies=[];
+var ordersWithoutTooManyCookies=[];
 
-
-let url = 'https://backend-challenge-fall-2017.herokuapp.com/orders.json';
-let available_cookies;
-let orders= [];
 
 
 
 app.get('/', (req, res) => {
+let current_page,total;
 	getData(url);
-	res.send(orders);
-});
-function getData(url,callback){
-	axios.get(url)
-	  .then(function (response) {
-	  	let current_page=response.data.pagination.current_page;
-	  	let total=response.data.pagination.total;
-	    if(current_page<total){
-	    	console.log("Queried page:"+current_page)
-	    	let nextpage=current_page+1;
-	    	let nextpageurl='?page='+nextpage;
-	    	console.log(nextpageurl)
-	    	orders.push(response.data.orders);
-	    	getData(url+nextpageurl);
-	    	callback;
-	    }
+let output={
+  "remaining_cookies": 0,
+  "unfulfilled_orders": []
+}
+	
 
-	  })
-	  .catch(function (error) {
-	    console.log(error);
-	  });
-	}
+
+function getData(url){
+	axios.get(url)
+	.then(function (response) {
+		current_page=response.data.pagination.current_page;
+		total=response.data.pagination.total;
+		if(current_page>total){
+			console.log("got all the data");
+			removeFulfilledOrders();
+			fullfillOrdersWithoutCookie();
+		}
+		else {
+			let nextpage=current_page+1;
+			let nextpageurl='?page='+nextpage;
+			if(response.data.orders.length>0){
+			orders=orders.concat(response.data.orders);
+			}
+			url = 'https://backend-challenge-fall-2017.herokuapp.com/orders.json';
+			getData(url+nextpageurl);
+		}
+	})
+	.catch(function (error) {
+		console.log(error);
+	});
+}
+
+
+// Filters out fulfilled orders
+function removeFulfilledOrders() {
+  unfulfilledOrders = orders.filter((order) => {
+    return order.fulfilled !== true;
+  })
+}
+
+//Helper Function
+function checkIfProductsHaveCookies(array, key, value) {
+  for (let i = 0; i < array.length; i++) {
+    if(array[i][key] === value) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Function to remove orders without cookies as they can be fullfilled
+function fullfillOrdersWithoutCookie(){
+	ordersWithCookies=[];
+	ordersWithCookies=unfulfilledOrders.filter((order)=>{
+		return checkIfProductsHaveCookies(order.products,"title","Cookie")
+	})
+	res.send(ordersWithCookies);
+}
+
+
+
+
+
+
+
+
+
+
+
+	
+});
+
+
+
+
+
 
 
 
@@ -46,3 +103,4 @@ function getData(url,callback){
 app.listen(port, function() {
 	console.log('Our app is running on http://localhost:' + port);
 });
+

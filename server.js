@@ -121,7 +121,7 @@ function fufillOrders(){
 
 	}
 	output.remaining_cookies=remaining_cookies;
-	output.unfulfilled_orders=unfulfilled_orders
+	output.unfulfilled_orders=unfulfilled_orders.sort((a,b)=>a-b);
 	// console.log("remaining_cookies"+remaining_cookies);
 	// console.log("unfulfilled_orders"+unfulfilled_orders);
 	res.send(output);

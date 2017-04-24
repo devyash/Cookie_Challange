@@ -13,7 +13,9 @@ var orders= [];
 var unfulfilledOrders=[];
 var ordersWithCookies=[];
 var ordersWithoutTooManyCookies=[];
-var sortedCookies=[]
+var sortedOrders=[];
+var remaining_cookies=0;
+var unfulfilled_orders=[];
 
 
 
@@ -27,16 +29,19 @@ let output={
 }
 	
 
-
+//This function recursively calls to itself
 function getData(url){
 	axios.get(url)
 	.then(function (response) {
 		current_page=response.data.pagination.current_page;
 		total=response.data.pagination.total;
+		available_cookies=parseInt(response.data.available_cookies);
+		// console.log("available_cookies"+available_cookies);
 		if(current_page>total){
-			console.log("got all the data");
-			removeFulfilledOrders();
+			filterFullfilledOrders();
 			fullfillOrdersWithoutCookie();
+			sortByCookiesAndId();
+			fufillOrders();
 		}
 		else {
 			let nextpage=current_page+1;
@@ -44,7 +49,7 @@ function getData(url){
 			if(response.data.orders.length>0){
 			orders=orders.concat(response.data.orders);
 			}
-			url = this.url;
+			url = 'https://backend-challenge-fall-2017.herokuapp.com/orders.json';
 			getData(url+nextpageurl);
 		}
 	})
@@ -54,58 +59,76 @@ function getData(url){
 }
 
 
+
+
+
 // Filters out fulfilled orders
-function removeFulfilledOrders() {
+function filterFullfilledOrders() {
   unfulfilledOrders = orders.filter((order) => {
     return order.fulfilled !== true;
   })
 }
-
-//Helper Function
-function checkIfProductsHaveCookies(array, key, value) {
-  for (let i = 0; i < array.length; i++) {
-    if(array[i][key] === value) {
-      return true;
-    }
-  }
-  return false;
+//helper function for find that helps in selecting the products that is cookie
+function findCookies(products) { 
+    return products.title === 'Cookie';
 }
+
 
 // Function to remove orders without cookies as they can be fullfilled
 function fullfillOrdersWithoutCookie(){
 	ordersWithCookies=[];
 	ordersWithCookies=unfulfilledOrders.filter((order)=>{
-		return checkIfProductsHaveCookies(order.products,"title","Cookie")
+		return order.products.find(findCookies);
 	})
-	res.send(ordersWithCookies);
+	// res.send(ordersWithCookies);
 }
 
+
+//sort the cookies by number of cookie than by id
 function sortByCookiesAndId(){
-	sortedCookies=[];
-	sortedCookies=ordersWithCookies.sort();
-
+	sortedOrders=[];
+	sortedOrders=ordersWithCookies.sort((x,y)=>{
+		var x=(y.products.find(findCookies).amount>x.products.find(findCookies).amount)
+		return (x==0)?(y.id-x.id):x;
+	
+	});
+	 // res.send(sortedOrders);
 }
 
+//Full fill possible orders based on available cookies
+function fufillOrders(){
+	remaining_cookies=available_cookies;
+	// console.log("remaining_cookies: "+remaining_cookies);
+	// console.log("available_cookies: "+available_cookies);
+	let i=0;
+	while(remaining_cookies>=0&&i<sortedOrders.length){
 
+		let current_amount=sortedOrders[i].products.find(findCookies).amount;
+		let current_order=sortedOrders[i]
+		// console.log("current_order: "+current_amount);
+		// console.log("current_amount: "+current_amount);
 
+		if(remaining_cookies>=current_amount)
+			remaining_cookies=remaining_cookies-current_amount;
+		else
+			unfulfilled_orders.push(current_order.id);
 
+		i++;
+		 
 
+	}
+	output.remaining_cookies=remaining_cookies;
+	output.unfulfilled_orders=unfulfilled_orders
+	// console.log("remaining_cookies"+remaining_cookies);
+	// console.log("unfulfilled_orders"+unfulfilled_orders);
+	res.send(output);
 
-
-
-
+}
 	
 });
 
 
-
-
-
-
-
-
-
 app.listen(port, function() {
-	console.log('Our app is running on http://localhost:' + port);
+	console.log('Our app is running on port:' + port);
 });
 

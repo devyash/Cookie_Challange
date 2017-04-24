@@ -7,7 +7,7 @@ const app = express()
 var port = process.env.PORT || 8080;
 // app.use(bodyParser.urlencoded({extended: true}))
 
-var url = 'https://backend-challenge-fall-2017.herokuapp.com/orders.json';
+var givenurl = 'https://backend-challenge-fall-2017.herokuapp.com/orders.json';
 var available_cookies;
 var orders= [];
 var unfulfilledOrders=[];
@@ -27,7 +27,7 @@ let output={
   "remaining_cookies": 0,
   "unfulfilled_orders": []
 }
-getData(url);
+getData(givenurl);
 	
 
 //This function recursively calls to itself
@@ -50,8 +50,7 @@ function getData(url){
 			if(response.data.orders.length>0){
 			orders=orders.concat(response.data.orders);
 			}
-			url = 'https://backend-challenge-fall-2017.herokuapp.com/orders.json';
-			getData(url+nextpageurl);
+			getData(givenurl+nextpageurl);
 		}
 	})
 	.catch(function (error) {
@@ -101,15 +100,12 @@ function sortByCookiesAndId(){
 function fufillOrders(){
 	let remaining_cookies=available_cookies;
 	let unfulfilled_orders=[];
-	// console.log("remaining_cookies: "+remaining_cookies);
-	// console.log("available_cookies: "+available_cookies);
+
 	let i=0;
 	while(remaining_cookies>=0&&i<sortedOrders.length){
 
 		let current_amount=sortedOrders[i].products.find(findCookies).amount;
 		let current_order=sortedOrders[i]
-		// console.log("current_order: "+current_order.id);
-		// console.log("current_amount: "+current_amount);
 
 		if(remaining_cookies>=current_amount)
 			remaining_cookies=remaining_cookies-current_amount;
@@ -122,8 +118,6 @@ function fufillOrders(){
 	}
 	output.remaining_cookies=remaining_cookies;
 	output.unfulfilled_orders=unfulfilled_orders.sort((a,b)=>a-b);
-	// console.log("remaining_cookies"+remaining_cookies);
-	// console.log("unfulfilled_orders"+unfulfilled_orders);
 	res.send(output);
 
 }

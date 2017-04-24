@@ -4,18 +4,18 @@ const axios = require('axios')
 const app = express()
 
 // process.env.PORT lets the port be set by Heroku
-var port = process.env.PORT || 8080;
+let port = process.env.PORT || 8080;
 // app.use(bodyParser.urlencoded({extended: true}))
 
-var givenurl = 'https://backend-challenge-fall-2017.herokuapp.com/orders.json';
-var available_cookies;
-var orders= [];
-var unfulfilledOrders=[];
-var ordersWithCookies=[];
-var ordersWithoutTooManyCookies=[];
-var sortedOrders=[];
-var remaining_cookies=0;
-var unfulfilled_orders=[];
+let givenurl = 'https://backend-challenge-fall-2017.herokuapp.com/orders.json';
+let available_cookies;
+let orders= [];
+let unfulfilledOrders=[];
+let ordersWithCookies=[];
+let ordersWithoutTooManyCookies=[];
+let sortedOrders=[];
+let remaining_cookies=0;
+let unfulfilled_orders=[];
 
 
 
@@ -89,7 +89,7 @@ function fullfillOrdersWithoutCookie(){
 function sortByCookiesAndId(){
 	sortedOrders=[];
 	sortedOrders=ordersWithCookies.sort((x,y)=>{
-		var order1=(y.products.find(findCookies).amount>x.products.find(findCookies).amount)
+		let order1=(y.products.find(findCookies).amount>x.products.find(findCookies).amount)
 		return (order1==0)?(x.id-y.id):order1;
 	
 	});

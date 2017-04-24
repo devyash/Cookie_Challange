@@ -21,12 +21,13 @@ var unfulfilled_orders=[];
 
 
 app.get('/', (req, res) => {
+	orders=[]
 let current_page,total;
-	getData(url);
 let output={
   "remaining_cookies": 0,
   "unfulfilled_orders": []
 }
+getData(url);
 	
 
 //This function recursively calls to itself
@@ -64,6 +65,7 @@ function getData(url){
 
 // Filters out fulfilled orders
 function filterFullfilledOrders() {
+  unfulfilled_orders=[]
   unfulfilledOrders = orders.filter((order) => {
     return order.fulfilled !== true;
   })
@@ -76,11 +78,11 @@ function findCookies(products) {
 
 // Function to remove orders without cookies as they can be fullfilled
 function fullfillOrdersWithoutCookie(){
-	ordersWithCookies=[];
+	ordersWithCookies=null;
 	ordersWithCookies=unfulfilledOrders.filter((order)=>{
 		return order.products.find(findCookies);
 	})
-	// res.send(ordersWithCookies);
+	 // res.send(ordersWithCookies);
 }
 
 
@@ -88,8 +90,8 @@ function fullfillOrdersWithoutCookie(){
 function sortByCookiesAndId(){
 	sortedOrders=[];
 	sortedOrders=ordersWithCookies.sort((x,y)=>{
-		var x=(y.products.find(findCookies).amount>x.products.find(findCookies).amount)
-		return (x==0)?(y.id-x.id):x;
+		var order1=(y.products.find(findCookies).amount>x.products.find(findCookies).amount)
+		return (order1==0)?(x.id-y.id):order1;
 	
 	});
 	 // res.send(sortedOrders);
@@ -97,8 +99,8 @@ function sortByCookiesAndId(){
 
 //Full fill possible orders based on available cookies
 function fufillOrders(){
-	remaining_cookies=available_cookies;
-	unfulfilled_orders=[];
+	let remaining_cookies=available_cookies;
+	let unfulfilled_orders=[];
 	// console.log("remaining_cookies: "+remaining_cookies);
 	// console.log("available_cookies: "+available_cookies);
 	let i=0;
@@ -106,7 +108,7 @@ function fufillOrders(){
 
 		let current_amount=sortedOrders[i].products.find(findCookies).amount;
 		let current_order=sortedOrders[i]
-		// console.log("current_order: "+current_amount);
+		// console.log("current_order: "+current_order.id);
 		// console.log("current_amount: "+current_amount);
 
 		if(remaining_cookies>=current_amount)

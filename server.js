@@ -31,7 +31,7 @@ let output={
 
 //This function recursively calls to itself
 function getData(url){
-	axios.get(url)
+		axios.get(url)
 	.then(function (response) {
 		current_page=response.data.pagination.current_page;
 		total=response.data.pagination.total;
@@ -98,6 +98,7 @@ function sortByCookiesAndId(){
 //Full fill possible orders based on available cookies
 function fufillOrders(){
 	remaining_cookies=available_cookies;
+	unfulfilled_orders=[];
 	// console.log("remaining_cookies: "+remaining_cookies);
 	// console.log("available_cookies: "+available_cookies);
 	let i=0;
